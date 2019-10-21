@@ -4,7 +4,7 @@
 **Part 2** - [Device Registration](DEVICE.md) - [Application](APP.md) - [MQTT](MQTT.md) - [**Server Certificate**](CERT1.md) - [Client Certificate](CERT2.md)
 ***
 
-# Adding secure communication between the device and IoT Platform using SSL/TLS
+# Adding secure communication between the device and IoT Platform using SSL/TLS - OPTIONAL!
 
 ## Lab Objectives
 

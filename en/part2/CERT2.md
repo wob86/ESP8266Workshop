@@ -4,7 +4,7 @@
 **Part 2** - [Device Registration](DEVICE.md) - [Application](APP.md) - [MQTT](/MQTT.md) - [Server Certificate](CERT1.md) - [**Client Certificate**](CERT2.md)
 ***
 
-# Using a Device Certificate to authenticate to the Watson IoT platform
+# Using a Device Certificate to authenticate to the Watson IoT platform - OPTIONAL!!
 
 ## Lab Objectives
 

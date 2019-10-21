@@ -1,6 +1,5 @@
 #include <FS.h>
 #include <ESP8266WiFi.h>
-#include <time.h>
 #include <Adafruit_NeoPixel.h>
 #include <DHT.h>
 #include <ArduinoJson.h>
@@ -20,9 +19,6 @@
 #define MQTT_TOPIC "iot-2/evt/status/fmt/json"
 #define MQTT_TOPIC_DISPLAY "iot-2/cmd/display/fmt/json"
 #define MQTT_TOPIC_INTERVAL "iot-2/cmd/interval/fmt/json"
-#define CA_CERT_FILE "/rootCA_certificate.der"
-#define KEY_FILE "/SecuredDev01_key.key"
-#define CERT_FILE "/SecuredDev01_crt.der"
 
 // Add GPIO pins used to connect devices
 #define RGB_PIN 5 // GPIO pin the data line of RGB LED is connected to
@@ -30,7 +26,7 @@
 
 // Specify DHT11 (Blue) or DHT22 (White) sensor
 //#define DHTTYPE DHT22
-#define DHTTYPE DHT11
+#define DHTTYPE DHT22
 #define NEOPIXEL_TYPE NEO_RGB + NEO_KHZ800
 
 // Temperatures to set LED by (assume temp in C)
@@ -38,10 +34,6 @@
 #define ALARM_HOT 30.0
 #define WARN_COLD 10.0
 #define WARN_HOT 25.0
-
-//Timezone info
-#define TZ_OFFSET 0  //Hours timezone offset to GMT (without daylight saving time)
-#define TZ_DST    60  //Minutes timezone offset for Daylight saving
 
 // Add WiFi connection information
 char ssid[] = "<SSID>";  // your network SSID (name)
@@ -62,7 +54,7 @@ DHT dht(DHT_PIN, DHTTYPE);
 
 // MQTT objects
 void callback(char* topic, byte* payload, unsigned int length);
-WiFiClientSecure wifiClient;
+WiFiClient wifiClient;
 PubSubClient mqtt(MQTT_HOST, MQTT_PORT, callback, wifiClient);
 
 // variables to hold data
@@ -143,63 +135,10 @@ void setup() {
   dht.begin();
   pixel.begin();
 
-  // Get cert(s) from file system
-  SPIFFS.begin();
-  File ca = SPIFFS.open(CA_CERT_FILE, "r");
-  if(!ca) {
-    Serial.println("Couldn't load CA cert");
-  } else {
-    bool ret = wifiClient.loadCACert(ca);
-    Serial.print("Loading CA cert returned ");
-    Serial.println((ret)? "true" : "false");
-    ca.close();
-  }
-  File key = SPIFFS.open(KEY_FILE, "r");
-  if(!key) {
-    Serial.println("Couldn't load key");
-  } else {
-    bool ret = wifiClient.loadPrivateKey(key);
-    Serial.print("Loading key returned ");
-    Serial.println((ret)? "true" : "false");
-    key.close();
-  }
-  File cert = SPIFFS.open(CERT_FILE, "r");
-  if(!cert) {
-    Serial.println("Couldn't load cert");
-  } else {
-    bool ret = wifiClient.loadCertificate(cert);
-    Serial.print("Loading cert returned ");
-    Serial.println((ret)? "true" : "false");
-    cert.close();
-  }
-
-  // Set time from NTP servers
-  configTime(TZ_OFFSET * 3600, TZ_DST * 60, "pool.ntp.org", "0.pool.ntp.org");
-  Serial.println("\nWaiting for time");
-  unsigned timeout = 5000;
-  unsigned start = millis();
-  while (millis() - start < timeout) {
-      time_t now = time(nullptr);
-      if (now > (2018 - 1970) * 365 * 24 * 3600) {
-          break;
-      }
-      delay(100);
-  }
-  delay(1000); // Wait for time to fully sync
-  Serial.println("Time sync'd");
-  time_t now = time(nullptr);
-  Serial.println(ctime(&now));
   
   // Connect to MQTT - IBM Watson IoT Platform
    while(! mqtt.connected()){
-    if (mqtt.connect(MQTT_DEVICEID, MQTT_USER, MQTT_TOKEN)) { // Token Authentication
-//    if (mqtt.connect(MQTT_DEVICEID)) { // No Token Authentication
-      if (wifiClient.verifyCertChain(MQTT_HOST)) {
-        Serial.println("certificate matches");
-      } else {
-        // ignore for now - but usually don't want to proceed if a valid cert not presented!
-        Serial.println("certificate doesn't match");
-      }
+    if (mqtt.connect(MQTT_DEVICEID)) { 
       Serial.println("MQTT Connected");
       mqtt.subscribe(MQTT_TOPIC_DISPLAY);
       mqtt.subscribe(MQTT_TOPIC_INTERVAL);
