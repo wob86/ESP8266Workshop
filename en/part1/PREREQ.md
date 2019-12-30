@@ -71,7 +71,9 @@ If you are a Mac user and use [homebrew](https://brew.sh) then the driver can be
 brew cask install homebrew/cask-drivers/silicon-labs-vcp-driver
 ```
 
-On Mac after the install you may need to approve the driver.  From the Apple menu, go to **System Preferences -> Security and Privacy** to allow the driver to be loaded.
+On macOS, starting from version 5.2.2 the installer does not install the driver per se, but the application to install it. You will find an installer in `/usr/local/Caskroom/silicon-labs-vcp-driver/5.2.2` that you'll need to run.
+
+While installing you may need to approve the driver. From the Apple menu, go to **System Preferences -> Security and Privacy** to allow the driver to be loaded.
 
 When the driver is installed and the NodeMCU module is connected you can test if the driver is working:
 
